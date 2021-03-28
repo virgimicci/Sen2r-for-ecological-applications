@@ -53,4 +53,6 @@ sen2r()
 # Type pf prpcessing: RAW files
 #RAW Level-2A (Sentinel 2A and 2B)
 
+###### sempre stesso errore: dati sci hub incorretti ma sono corretti ######
+
 
