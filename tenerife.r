@@ -1,3 +1,4 @@
+setwd("C:/internship/")
 install.packages("sen2r")
 library(sen2r)
 
@@ -54,5 +55,45 @@ sen2r()
 #RAW Level-2A (Sentinel 2A and 2B)
 
 ###### sempre stesso errore: dati sci hub incorretti ma sono corretti ######
+# risolto reinstallando geojeson
+
+## Using sen2r() from the command line ##
+out_dir_1  <- tempfile(pattern = "sen2r_out_1_") # output folder
+
+safe_dir_1 <- tempfile(pattern = "sen2r_safe_")  # folder to store downloaded SAFE
+
+myextent_1 <-"tenerife.shp" #spatial polygons needed to select tiles extent
+
+ out_paths_1 <- sen2r(gui = FALSE, preprocess = TRUE,
+
+                     s2_levels = "l2a",  sel_sensor = c("s2a", "s2b"),
+
+                     step_atmcorr = "auto",
+
+                     extent = myextent_1,
+
+                     extent_name = "Tenerife",
+
+                     timewindow = c(as.Date("2020-06-01"), as.Date("2020-08-31")),
+
+                     timeperiod = "full",
+
+                     list_prods = c("BOA"),
+
+                     list_indices = c("NDVI","NDBI"),
+
+                     mask_type = "cloud_and_shadow",
+
+                     max_mask = 10,
+
+                     res_s2 = "10m",
+
+                     path_l2a = safe_dir_1,
+
+                     path_out = out_dir_1,
+
+                     parallel = 6,
+
+                     resampling = "bilinear")
 
 
