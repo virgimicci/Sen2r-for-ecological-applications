@@ -1,18 +1,20 @@
-setwd("C:/internship/")
-install.packages("sen2r")
-library(sen2r)
 
+install.packages("sen2r")
 # Error: 
 # Some missing packages are needed to run the GUI; please install them with
 # the command
 # > install.packages(c("leaflet", "leafpm", "mapedit", "shiny", "shinyFiles", "shinydashboard", "shinyjs", "shinyWidgets")) 
-
 install.packages(c("leaflet", "leafpm", "mapedit", "shiny", "shinyFiles", "shinydashboard", "shinyjs", "shinyWidgets"))
 
 install.packages("remotes")
+
+setwd("C:/internship/")
+library(sen2r)
+
 library(remotes)
-library(raster)
 library(sp)
+library(raster)
+
 
 ### Installing Sen2Cor
 ## is used to perform atmospheric correction of Sentinel-2 Level-1C products
@@ -64,9 +66,18 @@ safe_dir_1 <- tempfile(pattern = "sen2r_safe_")  # folder to store downloaded SA
 
 myextent_1 <-"tenerife.shp" #spatial polygons needed to select tiles extent
 
- out_paths_1 <- sen2r(gui = FALSE, preprocess = TRUE,
+# 1. The Normalized Difference Built-up Index (NDBI) uses the NIR and SWIR bands to emphasize manufactured built-up areas. 
+# It is ratio based to mitigate the effects of terrain illumination differences as well as atmospheric effects.
+# NDBI = (SWIR - NIR) / (SWIR + NIR)
+# 2. The Normalized Difference Vegetation Index (NDVI) is an indicator of the greenness of the biomes.
+# NDVI = (REF_nir – REF_red)/(REF_nir + REF_red)
+# where REF_nir and REF_red are the spectral reflectances measured in the near infrared and red wavebands respectively, makes it widely used for ecosystems monitoring.
+# 3. BOA (bottom of atmosphere) or surface radiance: Atmospheric correction is then a method how to try to remove influence of just that portion 
+# of light reflected off atmosphere on the image and preserve the part reflected off the surface below.
 
-                     s2_levels = "l2a",  sel_sensor = c("s2a", "s2b"),
+out_paths_1 <- sen2r(gui = FALSE, preprocess = TRUE,
+                     
+                      s2_levels = "l2a",  sel_sensor = c("s2a", "s2b"),
 
                      step_atmcorr = "auto",
 
@@ -95,5 +106,68 @@ myextent_1 <-"tenerife.shp" #spatial polygons needed to select tiles extent
                      parallel = 6,
 
                      resampling = "bilinear")
+# sen2r Processing Report
+#¦----------------------------------------------------------------------------------------------
+#¦ Dates to be processed based on processing parameters: 18
+#¦ Processing completed for: 8 out of 18 expected dates.
+#¦ WARNING: Outputs for: 10 out of 18 expected dates not created because of unexpected reasons."
+#¦ These files will be skipped during next executions from the current JSON parameter file. To
+#¦ try again to build them, remove their file names in the text file
+#¦ "C:\Users\Virginia\AppData\Local\Temp\RTMPMP~1\SEN2R_~3\IGNORE~1.TXT".
+#¦ Outputs for: 10 out of 18 expected dates not created because cloudiness over the spatial
+#¦ extent is above 10%.
+#¦ The list of these files was written in a hidden file, so to be skipped during next executions
+#¦ from the current JSON parameter file.
+#¦ To process them again (e.g., because you changed the "max_mask" setting) delete their dates
+#¦ in the text file "C:\Users\Virginia\AppData\Local\Temp\RTMPMP~1\SEN2R_~3\IGNORE~1.TXT".
 
+#S2 original SAFE images are stored in the folder specified by `safe_dir_1`, 
+#and are not deleted after processing (unless the user sets also the argument 
+#`rm_safe` to `TRUE`).
 
+list.files(safe_dir_1)
+#[1] "S2A_MSIL2A_20200604T115231_N0214_R123_T28RCS_20200604T125727.SAFE"
+#[2] "S2A_MSIL2A_20200614T115221_N0214_R123_T28RCS_20200614T155214.SAFE"
+#[3] "S2A_MSIL2A_20200624T115221_N0214_R123_T28RCS_20200624T141538.SAFE"
+#[4] "S2A_MSIL2A_20200704T115221_N0214_R123_T28RCS_20200704T125229.SAFE"
+#[5] "S2A_MSIL2A_20200714T115221_N0214_R123_T28RCS_20200714T191310.SAFE"
+#[6] "S2A_MSIL2A_20200724T115221_N0214_R123_T28RCS_20200724T142720.SAFE"
+#[7] "S2A_MSIL2A_20200803T115221_N0214_R123_T28RCS_20200803T125216.SAFE"
+#[8] "S2A_MSIL2A_20200813T115221_N0214_R123_T28RCS_20200813T130020.SAFE"
+#[9] "S2A_MSIL2A_20200823T115221_N0214_R123_T28RCS_20200823T160612.SAFE"
+#[10] "S2B_MSIL2A_20200609T115219_N0214_R123_T28RCS_20200609T154949.SAFE"
+#[11] "S2B_MSIL2A_20200619T115219_N0214_R123_T28RCS_20200619T155214.SAFE"
+#[12] "S2B_MSIL2A_20200629T115219_N0214_R123_T28RCS_20200629T155137.SAFE"
+#[13] "S2B_MSIL2A_20200709T115219_N0214_R123_T28RCS_20200709T141705.SAFE"
+#[14] "S2B_MSIL2A_20200719T115219_N0214_R123_T28RCS_20200719T155303.SAFE"
+#[15] "S2B_MSIL2A_20200729T115219_N0214_R123_T28RCS_20200729T160543.SAFE"
+#[16] "S2B_MSIL2A_20200808T115219_N0214_R123_T28RCS_20200808T142451.SAFE"
+#[17] "S2B_MSIL2A_20200818T115219_N0214_R123_T28RCS_20200818T174433.SAFE"
+#[18] "S2B_MSIL2A_20200828T115219_N0214_R123_T28RCS_20200828T132940.SAFE"
+
+# Outputs are automatically subsetted and masked over the study area, 
+# and stored in appropriate subfolders of `out_dir_1`.
+
+> list.files(out_dir_1)
+# [1] "BOA"  "NDBI" "NDVI"
+
+> list.files(file.path(out_dir_1, "NDVI"))
+#[1] "S2A2A_20200614_123_Tenerife_NDVI_10.tif" "S2A2A_20200714_123_Tenerife_NDVI_10.tif"
+#[3] "S2A2A_20200823_123_Tenerife_NDVI_10.tif" "S2B2A_20200709_123_Tenerife_NDVI_10.tif"
+#[5] "S2B2A_20200719_123_Tenerife_NDVI_10.tif" "S2B2A_20200808_123_Tenerife_NDVI_10.tif"
+#[7] "S2B2A_20200818_123_Tenerife_NDVI_10.tif" "S2B2A_20200828_123_Tenerife_NDVI_10.tif"
+#[9] "thumbnails"       
+
+> list.files(file.path(out_dir_1, "BOA"))
+#[1] "S2A2A_20200614_123_Tenerife_BOA_10.tif" "S2A2A_20200714_123_Tenerife_BOA_10.tif"
+#[3] "S2A2A_20200823_123_Tenerife_BOA_10.tif" "S2B2A_20200709_123_Tenerife_BOA_10.tif"
+#[5] "S2B2A_20200719_123_Tenerife_BOA_10.tif" "S2B2A_20200808_123_Tenerife_BOA_10.tif"
+#[7] "S2B2A_20200818_123_Tenerife_BOA_10.tif" "S2B2A_20200828_123_Tenerife_BOA_10.tif"
+#[9] "thumbnails"         
+
+> list.files(file.path(out_dir_1, "NDBI"))
+#[1] "S2A2A_20200614_123_Tenerife_NDBI_10.tif" "S2A2A_20200714_123_Tenerife_NDBI_10.tif"
+#[3] "S2A2A_20200823_123_Tenerife_NDBI_10.tif" "S2B2A_20200709_123_Tenerife_NDBI_10.tif"
+#[5] "S2B2A_20200719_123_Tenerife_NDBI_10.tif" "S2B2A_20200808_123_Tenerife_NDBI_10.tif"
+#[7] "S2B2A_20200818_123_Tenerife_NDBI_10.tif" "S2B2A_20200828_123_Tenerife_NDBI_10.tif"
+#[9] "thumbnails" 
