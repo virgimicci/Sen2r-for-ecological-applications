@@ -148,24 +148,24 @@ list.files(safe_dir_1)
 # Outputs are automatically subsetted and masked over the study area, 
 # and stored in appropriate subfolders of `out_dir_1`.
 
-> list.files(out_dir_1)
+list.files(out_dir_1)
 # [1] "BOA"  "NDBI" "NDVI"
 
-> list.files(file.path(out_dir_1, "NDVI"))
+list.files(file.path(out_dir_1, "NDVI"))
 #[1] "S2A2A_20200614_123_Tenerife_NDVI_10.tif" "S2A2A_20200714_123_Tenerife_NDVI_10.tif"
 #[3] "S2A2A_20200823_123_Tenerife_NDVI_10.tif" "S2B2A_20200709_123_Tenerife_NDVI_10.tif"
 #[5] "S2B2A_20200719_123_Tenerife_NDVI_10.tif" "S2B2A_20200808_123_Tenerife_NDVI_10.tif"
 #[7] "S2B2A_20200818_123_Tenerife_NDVI_10.tif" "S2B2A_20200828_123_Tenerife_NDVI_10.tif"
 #[9] "thumbnails"       
 
-> list.files(file.path(out_dir_1, "BOA"))
+list.files(file.path(out_dir_1, "BOA"))
 #[1] "S2A2A_20200614_123_Tenerife_BOA_10.tif" "S2A2A_20200714_123_Tenerife_BOA_10.tif"
 #[3] "S2A2A_20200823_123_Tenerife_BOA_10.tif" "S2B2A_20200709_123_Tenerife_BOA_10.tif"
 #[5] "S2B2A_20200719_123_Tenerife_BOA_10.tif" "S2B2A_20200808_123_Tenerife_BOA_10.tif"
 #[7] "S2B2A_20200818_123_Tenerife_BOA_10.tif" "S2B2A_20200828_123_Tenerife_BOA_10.tif"
 #[9] "thumbnails"         
 
-> list.files(file.path(out_dir_1, "NDBI"))
+list.files(file.path(out_dir_1, "NDBI"))
 #[1] "S2A2A_20200614_123_Tenerife_NDBI_10.tif" "S2A2A_20200714_123_Tenerife_NDBI_10.tif"
 #[3] "S2A2A_20200823_123_Tenerife_NDBI_10.tif" "S2B2A_20200709_123_Tenerife_NDBI_10.tif"
 #[5] "S2B2A_20200719_123_Tenerife_NDBI_10.tif" "S2B2A_20200808_123_Tenerife_NDBI_10.tif"
