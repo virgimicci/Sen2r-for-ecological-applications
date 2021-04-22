@@ -125,6 +125,7 @@ out_paths_1 <- sen2r(gui = FALSE, preprocess = TRUE,
 #and are not deleted after processing (unless the user sets also the argument 
 #`rm_safe` to `TRUE`).
 
+
 list.files(safe_dir_1)
 #[1] "S2A_MSIL2A_20200604T115231_N0214_R123_T28RCS_20200604T125727.SAFE"
 #[2] "S2A_MSIL2A_20200614T115221_N0214_R123_T28RCS_20200614T155214.SAFE"
@@ -147,6 +148,16 @@ list.files(safe_dir_1)
 
 # Outputs are automatically subsetted and masked over the study area, 
 # and stored in appropriate subfolders of `out_dir_1`.
+
+# Output images are named based on the following schema:
+# S2mll_date_orb_aoi_prod_res.ext
+# S2mll= mission ID ("S2A" or "S2B") and product level (1C or 2A)
+# date= acquisition date
+# orb= orbit number
+# aoi= specified by user to describe the AOI
+# prod= ouput type
+# res= is the minimum spatial resolution in metres of the original S2 bands used to generate the product (10, 20 or 60)
+# ext= is the file extension.
 
 list.files(out_dir_1)
 # [1] "BOA"  "NDBI" "NDVI"
@@ -171,3 +182,24 @@ list.files(file.path(out_dir_1, "NDBI"))
 #[5] "S2B2A_20200719_123_Tenerife_NDBI_10.tif" "S2B2A_20200808_123_Tenerife_NDBI_10.tif"
 #[7] "S2B2A_20200818_123_Tenerife_NDBI_10.tif" "S2B2A_20200828_123_Tenerife_NDBI_10.tif"
 #[9] "thumbnails" 
+
+##NON HO I FILE SCARICATI: provo un altra maniera##
+
+library(sf)
+myextent_1 <- st_read("tenerife.shp")
+time_window <-as.Date(c("2015-01-01","2020-09-30")
+                      
+L2A_list_20<- s2_list(spatial_extent= myextent_1, time_interval= time_window, max_cloud=20, level= "L2A")
+L2A_list_10<- s2_list(spatial_extent= myextent_1, time_interval= time_window, max_cloud=10, level= "L2A")
+L2A_list_5<- s2_list(spatial_extent= myextent_1, time_interval= time_window, max_cloud=5, level= "L2A")
+
+# View of my shp
+library(ggplot2)
+ggplot() + geom_sf(data=myextent_1, size=3, color= "green", fill= "green") + ggtitle("Tenerife") + coord_sf()
+              
+                      
+                      
+                      
+                      
+                      
+                      
