@@ -126,6 +126,6 @@ shp <- spTransform(shp, CRS(" +proj=utm +zone=28 +datum=WGS84 +units=m +no_defs"
 NDVI_shp<- mask(NDVI, shp)
 plot(NDVI_shp)
 
-cl <- colorRampPalette(c('lightpink4','light blue','darkorchid3'))(100) 
+cl <- colorRampPalette(c('blue','white','red'))(100) 
 plot(NDVI_shp, col= cl)                
                    
