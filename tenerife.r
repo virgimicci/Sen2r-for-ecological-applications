@@ -117,10 +117,15 @@ list.files(file.path("C:/internship/sen2r_out", "NDVI"))
 # [5] "S2B2A_20200510_123_Tenerife_NDVI_10.tif" "S2B2A_20200520_123_Tenerife_NDVI_10.tif"
 #[7] "thumbnails"  
 setwd("C:/internship/sen2r_out/NDVI")
-NDVI <- stack("S2A2A_20200505_123_Tenerife_NDVI_10.tif","S2A2A_20200525_123_Tenerife_NDVI_10.tif","S2B2A_20200420_123_Tenerife_NDVI_10.tif","S2B2A_20200430_123_Tenerife_NDVI_10.tif","S2B2A_20200510_123_Tenerife_NDVI_10.tif","S2B2A_20200520_123_Tenerife_NDVI_10.tif")
+NDVI <- stack("S2B2A_20200420_123_Tenerife_NDVI_10.tif","S2B2A_20200430_123_Tenerife_NDVI_10.tif","S2A2A_20200505_123_Tenerife_NDVI_10.tif",
+              "S2B2A_20200510_123_Tenerife_NDVI_10.tif", "S2B2A_20200520_123_Tenerife_NDVI_10.tif", "S2A2A_20200525_123_Tenerife_NDVI_10.tif")
 plot(NDVI)
 
 shp <-shapefile("C:/thesis work/tenerife.shp")
-shp<- spTransform(shp, CRS(" +proj=utm +zone=28 +datum=WGS84 +units=m +no_defs")
+shp <- spTransform(shp, CRS(" +proj=utm +zone=28 +datum=WGS84 +units=m +no_defs"))
 NDVI_shp<- mask(NDVI, shp)
+plot(NDVI_shp)
 
+cl <- colorRampPalette(c('lightpink4','light blue','darkorchid3'))(100) 
+plot(NDVI_shp, col= cl)                
+                   
