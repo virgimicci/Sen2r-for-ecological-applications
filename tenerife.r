@@ -129,3 +129,24 @@ plot(NDVI_shp)
 cl <- colorRampPalette(c('blue','white','red'))(100) 
 plot(NDVI_shp, col= cl)                
                    
+
+###### 
+setwd("C:/internship/sen2r_out/RGB432B")
+RGB432<-list.files(setwd("C:/internship/sen2r_out/RGB432B"))
+RGB432
+RGB432_04<- brick("S2B2A_20200430_123_Tenerife_RGB432B_10.tif")
+RGB432_04<- mask(RGB432_04, shp)
+plot(RGB432_04)
+plotRGB(RGB432_04, r=1,g=2,b=3, stretch="lin")
+
+RGB432_05<- brick("S2A2A_20200525_123_Tenerife_RGB432B_10.tif")
+RGB432_05<- mask(RGB432_04, shp)
+plot(RGB432_05)
+plotRGB(RGB432_05, r=1,g=2,b=3, stretch="lin")
+
+# Unsupervised Classification
+# Let's play a bit with RStoolbox
+library(RStoolbox)
+RGB432_04uns<- unsuperClass(maskRGB432_04,nClasses = 7)
+plot(RGB432_04uns$map)
+
