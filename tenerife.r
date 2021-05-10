@@ -11,7 +11,7 @@ install.packages("remotes")
 setwd("C:/internship/")
 library(sen2r)
 library(remotes)
-library(sp)
+library(sf)
 library(raster)
 
 ### Installing Sen2Cor
@@ -64,23 +64,23 @@ sen2r()
 
 # My AOI
 library(sf)
-myextent_1 <- st_read("tenerife.shp") #created by QGIS
+myextent <- st_read("TEN.shp") #created by QGIS
 
 # View of my shp
 library(ggplot2)
 ggplot() + geom_sf(data=myextent_1, size=3, color= "green", fill= "green") + ggtitle("Tenerife") + coord_sf()
 
-time_window <-as.Date(c("2015-04-01","2020-05-31"))
+time_window <-as.Date(c("2020-01-01","2020-12-31"))
 
 ##### Download with the s2_download function #####
 
 # list of safe file available for my AOI, when I have images with max cloudiness of 5% i pick that ones otherwise the ones with 10/20%
-L2A_list_20 <- s2_list(spatial_extent= myextent_1, time_interval= time_window, max_cloud=20, level= "L2A")
-L2A_list_10 <- s2_list(spatial_extent= myextent_1, time_interval= time_window, max_cloud=10, level= "L2A")
-L2A_list_5 <- s2_list(spatial_extent= myextent_1, time_interval= time_window, max_cloud=5, level= "L2A")
+L2A_list_20 <- s2_list(spatial_extent= myextent, time_interval= time_window, max_cloud=20, level= "L2A")
+L2A_list_10 <- s2_list(spatial_extent= myextent, time_interval= time_window, max_cloud=10, level= "L2A")
+L2A_list_5 <- s2_list(spatial_extent= myextent, time_interval= time_window, max_cloud=5, level= "L2A")
 
 # I don't have L2A files before 2017, so if I want images of 2015 and 2016 I have to take L1C files and then use sen2cor()
-L1C_list_10 <- s2_list(spatial_extent= myextent_1, time_interval= time_window, max_cloud=10, level= "L1C")
+L1C_list_10 <- s2_list(spatial_extent= myextent, time_interval= time_window, max_cloud=10, level= "L1C")
          
 # View of the list of SAFE files, in order to see which are available 
 names(L2A_list_20) # L2A_list_20[c(49,48)] # 2019
@@ -97,10 +97,10 @@ s2_download(L2A_list, outdir= "L2A") # download the safe files
 
 ###### Let's do it with the sen2r() function #####
                       
-out_paths_1 <- sen2r(gui= FALSE, extent = myextent_1, extent_name = "Tenerife", timewindow = time_window, 
-                     timeperiod = "seasonal", list_prods = c("BOA", "SCL"), 
+out_paths_1 <- sen2r(gui= FALSE, extent = myextent, extent_name = "Tenerife", timewindow = time_window, 
+                     timeperiod = "seasonal", list_prods = c("BOA"), 
                      list_indices = c("NDVI"), mask_type = "cloud_and_shadow",
-                     max_mask = 20, list_rgb = c("RGB432B", "RGBb84B"), 
+                     max_mask = 30, max_cloud_safe = 10, list_rgb = c("RGB432B", "RGBb84B"), 
                      path_l2a = "C:/internship/sen2r_safe", path_l1c = "C:/internship/sen2r_safe", path_out ="C:/internship/sen2r_out" )  
 
 # See what we have
