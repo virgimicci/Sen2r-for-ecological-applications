@@ -53,10 +53,10 @@ tf_07 <- raster("S2B2A_20200719_123_Tenerife_NDVI_10.tif")
 shp <- st_transform(myextent, CRS("+proj=utm +zone=28 +datum=WGS84 +units=m +no_defs")) # setting the same CRS
 tf_07 <- mask( tf_07, shp)
 plot(tf_07)
-
 tf_07r<- aggregate(tf_07, fact=5)
 
 ## raster div
+library(rasterdiv)
 sha <- Shannon(tf_07r, window=9, rasterOut=TRUE, np=3,na.tolerance=0.9, cluster.type="SOCK", debugging=FALSE)
 # error :  unused argument (rasterOut = TRUE)
 sha <- Shannon(tf_07r, window=9, np=3,na.tolerance=0.9, cluster.type="SOCK", debugging=FALSE)
