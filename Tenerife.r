@@ -1,9 +1,18 @@
 setwd("C:/internship")
 wd<- setwd("C:/internship")
 
+install.packages("sen2r")
+# Error: 
+# Some missing packages are needed to run the GUI; please install them with
+# the command
+# > install.packages(c("leaflet", "leafpm", "mapedit", "shiny", "shinyFiles", "shinydashboard", "shinyjs", "shinyWidgets")) 
+install.packages(c("leaflet", "leafpm", "mapedit", "shiny", "shinyFiles", "shinydashboard", "shinyjs", "shinyWidgets"))
+
 library(sen2r)
 library(raster)
 library(sf)
+library(RStoolbox)
+library(viridis)
 
 # Check shihub credentials
 read_scihub_login() # returns a matrix of credentials, in which username is in the first column, password in the second
@@ -18,10 +27,10 @@ check_scihub_connection() #  returns TRUE if internet connection is available an
 # • aria2 to download SAFE images with an alternative downloader
 
 # safe_is_online() if the required SAFE archives are available for download, or if they have to be
-ordered from the Long Term Archive
+# ordered from the Long Term Archive
 
 # safe_getMetadata() returns a data.table, a data.frame or a list (depending on argument format)
-with the output metadata
+# with the output metadata
 
 myextent <- st_read("TEN.shp") #created by QGIS
 time_window <-as.Date(c("2020-01-01","2020-12-31"))
@@ -29,7 +38,7 @@ time_window <-as.Date(c("2020-01-01","2020-12-31"))
 # Show index names within the package
 list_indices(c("name","longname"))  
 
-# Return the NDVI formula, can be done for each indices to see the formula used
+# Return the NDVI formula, can be done for each indices to see the formula 
 list_indices("s2_formula", "NDVI")
 
 
@@ -45,23 +54,71 @@ out_paths_1 <- sen2r(gui= FALSE, extent = myextent, extent_name = "Tenerife", ti
 ## Nessuna immagine è online quindi vado a scaricarle https://scihub.copernicus.eu/dhus/#/home
 # riprovo
 
+# NDVI 
+# # RStoolbox::unsuperClass
 wd_ndvi <- setwd("C:/internship/sen2r_out/NDVI")
 list.files(wd_ndvi)
-tf_07 <- raster("S2B2A_20200719_123_Tenerife_NDVI_10.tif")
-
-# mask tf
+tf_2111ndvi<- raster("S2A2A_20201121_123_Tenerife_NDVI_10.tif")
 shp <- st_transform(myextent, CRS("+proj=utm +zone=28 +datum=WGS84 +units=m +no_defs")) # setting the same CRS
-tf_07 <- mask( tf_07, shp)
-plot(tf_07)
-tf_07r<- aggregate(tf_07, fact=5)
+tf_2111ndvi <- mask( tf_2111ndvi, shp)
+plot(tf_2111ndvi)
+anagandvi <- crop(tf_2111ndvi, extent)
+anagandvic <- unsuperClass(anagandvi, nClasses = 6)
+cl <- viridis(6)
 
-## raster div
-library(rasterdiv)
-sha <- Shannon(tf_07r, window=9, rasterOut=TRUE, np=3,na.tolerance=0.9, cluster.type="SOCK", debugging=FALSE)
-# error :  unused argument (rasterOut = TRUE)
-sha <- Shannon(tf_07r, window=9, np=3,na.tolerance=0.9, cluster.type="SOCK", debugging=FALSE)
-## needed "snow" packages
-rao <- Rao(tf_07r, dist_m="euclidean", window=9, mode="classic",lambda=0, shannon=FALSE, rescale=FALSE, na.tolerance=0.9, simplify=3, np=3, cluster.type="SOCK", debugging=FALSE)
+plot(anagandvic$map, col=cl)
 
+par(mfrow=c(1,2))
+plot(anagandvic$map, col=cl, main = "unsupervised classification (6)")
+plot(anagandvi, main= "NDVI")
+
+
+# RGB432B
+wd_RGB <- setwd("C:/internship/sen2r_out/RGB432B")
+list.files(wd_RGB)
+tf_2111 <- brick("S2A2A_20201121_123_Tenerife_RGB432B_10.tif")
+plot(tf_2111)
+
+# 1. red= S2A2A_20201121_123_Tenerife_RGB432B_10.1
+# 2. green= S2A2A_20201121_123_Tenerife_RGB432B_10.2
+# 3. blue= S2A2A_20201121_123_Tenerife_RGB432B_10.3
+
+tf_2111 <- mask(tf_2111, shp)
+extent <- c( 370000, 390560, 3140000, 3163080 )
+anaga <- crop(tf_2111, extent)
+
+# for an easly reading i change the names of the bands
+ names(anaga) <- c("B4", "B3", "B2")
+
+# 1. B4
+# 2. B3
+# 3. B2
+plot(anaga)
+
+# Rstoolbox::unsuperClass
+anagac <- unsuperClass(anaga, nClasses = 7)
+cl <- colorRampPalette(c('yellow','black','red'))(100)
+plot(anaga$map, col = cl)
+
+
+###################
+# tenerife marzo-aprile-maggio # nuvolenuvolenuvoleeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee :/
+time_window <-as.Date(c("2020-03-01","2020-05-31"))
+L2A_list_5 <- s2_list(spatial_extent= myextent, time_interval= time_window, max_cloud=5, level= "L2A")
+L2A_list_5
+safe_is_online(L2A_list_5) # All 3 products are online
+# S2B_MSIL2A_20200301T115219_N0214_R123_T28RCS_20200301T141311.SAFE 
+#                                                             TRUE 
+# S2B_MSIL2A_20200430T115219_N0214_R123_T28RCS_20200430T141757.SAFE 
+#                                                             TRUE 
+# S2A_MSIL2A_20200505T115221_N0214_R123_T28RCS_20200505T125034.SAFE 
+#                                                             TRUE 
+# in this way i'll just hace SAFE files 
+s2_download(L2A_list, outdir= "sen2r_safe") # download the safe files 
+
+# provo 2018
+time_window <-as.Date(c("2018-03-01","2018-05-31"))
+L2A_list <- s2_list(spatial_extent= myextent, time_interval= time_window, max_cloud=0, level= "L2A")
+L2A_list_5
 
 
