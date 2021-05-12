@@ -62,9 +62,20 @@ tf_2111ndvi<- raster("S2A2A_20201121_123_Tenerife_NDVI_10.tif")
 shp <- st_transform(myextent, CRS("+proj=utm +zone=28 +datum=WGS84 +units=m +no_defs")) # setting the same CRS
 tf_2111ndvi <- mask( tf_2111ndvi, shp)
 plot(tf_2111ndvi)
+
+set.seed(95)
+cl <- viridis(6)
+
+#tenerife
+tenerifer <- aggregate(tf_2111ndvi, fact= 10)
+tenerife <-  unsuperClass(tf_2111ndvi, nClasses = 6)
+plot(tenerife$map, col=cl)
+
+# anaga
+extent <- c( 370000, 390560, 3140000, 3163080 )
 anagandvi <- crop(tf_2111ndvi, extent)
 anagandvic <- unsuperClass(anagandvi, nClasses = 6)
-cl <- viridis(6)
+
 
 plot(anagandvic$map, col=cl)
 
@@ -72,28 +83,6 @@ par(mfrow=c(1,2))
 plot(anagandvic$map, col=cl, main = "unsupervised classification (6)")
 plot(anagandvi, main= "NDVI")
 
-
-# RGB432B
-wd_RGB <- setwd("C:/internship/sen2r_out/RGB432B")
-list.files(wd_RGB)
-tf_2111 <- brick("S2A2A_20201121_123_Tenerife_RGB432B_10.tif")
-plot(tf_2111)
-
-# 1. red= S2A2A_20201121_123_Tenerife_RGB432B_10.1
-# 2. green= S2A2A_20201121_123_Tenerife_RGB432B_10.2
-# 3. blue= S2A2A_20201121_123_Tenerife_RGB432B_10.3
-
-tf_2111 <- mask(tf_2111, shp)
-extent <- c( 370000, 390560, 3140000, 3163080 )
-anaga <- crop(tf_2111, extent)
-
-# for an easly reading i change the names of the bands
- names(anaga) <- c("B4", "B3", "B2")
-
-# 1. B4
-# 2. B3
-# 3. B2
-plot(anaga)
 
 # Rstoolbox::unsuperClass
 anagac <- unsuperClass(anaga, nClasses = 7)
