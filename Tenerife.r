@@ -32,6 +32,7 @@ check_scihub_connection() #  returns TRUE if internet connection is available an
 # safe_getMetadata() returns a data.table, a data.frame or a list (depending on argument format)
 # with the output metadata
 
+#### TAKING DATA FROM senr2 ######
 myextent <- st_read("TEN.shp") #created by QGIS
 time_window <-as.Date(c("2020-01-01","2020-12-31"))
 
@@ -53,6 +54,17 @@ out_paths_1 <- sen2r(gui= FALSE, extent = myextent, extent_name = "Tenerife", ti
 
 ## Nessuna immagine è online quindi vado a scaricarle https://scihub.copernicus.eu/dhus/#/home
 # riprovo
+
+####################### multitemporal 2020
+setwd("C:/internship/sen2r_out/NDVI")
+wd<-setwd("C:/internship/sen2r_out/NDVI")
+list <- list.files(pattern=".tif")
+raster <- lapply(list, raster)
+ndvi <- stack(raster)
+shp <- st_transform(myextent, CRS("+proj=utm +zone=28 +datum=WGS84 +units=m +no_defs")) # setting the same CRS
+ndvi_m <- mask(ndvi, shp)
+plot(ndvi_m)
+ndvi_mo <- subset(ndvi_m, order(c("Mag20","Lug19","Ag08","Ag18","Ag28","Ott01","Ott07","Ott12","Nov21")))
 
 # NDVI 
 # # RStoolbox::unsuperClass
