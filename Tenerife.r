@@ -46,7 +46,7 @@ list_indices("s2_formula", "NDVI")
 out_paths_1 <- sen2r(gui= FALSE, extent = myextent, extent_name = "Tenerife", timewindow = time_window, 
                      timeperiod = "full", list_prods = c("BOA"), 
                      list_indices = c("NDVI"), mask_type = "cloud_and_shadow",
-                     max_mask = 30, max_cloud_safe = 10, list_rgb = c("RGB432B", "RGBb84B"), 
+                     max_mask = 30, max_cloud_safe = 5, list_rgb = c("RGB432B", "RGBb84B"), 
                      path_l2a = "C:/internship/sen2r_safe", path_l1c = "C:/internship/sen2r_safe", path_out ="C:/internship/sen2r_out" )
                      
 ## Warning message:
