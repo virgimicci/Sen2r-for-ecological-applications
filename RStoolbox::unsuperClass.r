@@ -1,3 +1,5 @@
+library(RStoolbox)
+library(viridis)
 
 # # RStoolbox::unsuperClass
 wd1
