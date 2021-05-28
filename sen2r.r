@@ -2,6 +2,7 @@ setwd("C:/internship")
 wd<- setwd("C:/internship")
 
 install.packages("sen2r")
+install.packages("geojsonlint")
 # Error: 
 # Some missing packages are needed to run the GUI; please install them with
 # the command
@@ -10,11 +11,6 @@ install.packages(c("leaflet", "leafpm", "mapedit", "shiny", "shinyFiles", "shiny
 
 library(sen2r)
 library(raster)
-library(sf)
-library(RStoolbox)
-library(viridis)
-install.packages("geojsonlint")
-
 
 # Check shihub credentials
 write_scihub_login() # to write new credentials
