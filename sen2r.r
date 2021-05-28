@@ -13,8 +13,11 @@ library(raster)
 library(sf)
 library(RStoolbox)
 library(viridis)
+install.packages("geojsonlint")
+
 
 # Check shihub credentials
+write_scihub_login() # to write new credentials
 read_scihub_login() # returns a matrix of credentials, in which username is in the first column, password in the second
 check_scihub_login("name", "password") #  returns TRUE if credentials are valid, FALSE elsewhere
 check_scihub_connection() #  returns TRUE if internet connection is available and SciHub is accessible, FALSE otherwise.
@@ -34,42 +37,58 @@ check_scihub_connection() #  returns TRUE if internet connection is available an
 
 #### TAKING DATA FROM senr2 ######
 myextent <- st_read("TEN.shp") #created by QGIS
-time_window <-as.Date(c("2020-01-01","2020-12-31"))
+# chek on copernicus hub my images: how they are, which are online and which not
+# if i have images that I need that are offline I order it (they will be online for me for a delimited time, then they will return offline)
+time_window <-as.Date(c("2020-10-01","2021-05-27"))
 
+### Now I have to create my code to download them with the sen2r()
 # Show index names within the package
 list_indices(c("name","longname"))  
 
 # Return the NDVI formula, can be done for each indices to see the formula 
 list_indices("s2_formula", "NDVI")
 
-
+# I created two folder in order to save my files: sen2r_safe (for SAFE products) and sen2r_out (for the modified products)
 out_paths_1 <- sen2r(gui= FALSE, extent = myextent, extent_name = "Tenerife", timewindow = time_window, 
                      timeperiod = "full", list_prods = c("BOA"), 
-                     list_indices = c("NDVI"), mask_type = "cloud_and_shadow",
+                     list_indices = c("NDVI", "NDWI"), mask_type = "cloud_and_shadow",
+                     max_mask = 30, max_cloud_safe = 20, list_rgb = c("RGB432B", "RGBb84B"), 
+                     path_l2a = "C:/internship/sen2r_safe", path_l1c = "C:/internship/sen2r_safe", path_out ="C:/internship/sen2r_out" )
+# I don't have a good Dic for the clouds, so I take the one of the previous year 
+time_window2 <-as.Date(c("2019-12-01","2019-12-31"))
+out_paths_1 <- sen2r(gui= FALSE, extent = myextent, extent_name = "Tenerife", timewindow = time_window2, 
+                     timeperiod = "full", list_prods = c("BOA"), 
+                     list_indices = c("NDVI", "NDWI"), mask_type = "cloud_and_shadow",
                      max_mask = 30, max_cloud_safe = 5, list_rgb = c("RGB432B", "RGBb84B"), 
                      path_l2a = "C:/internship/sen2r_safe", path_l1c = "C:/internship/sen2r_safe", path_out ="C:/internship/sen2r_out" )
-                     
-## Warning message:
-## Processing was not completed because some required images are offline   
-
-## Nessuna immagine è online quindi vado a scaricarle https://scihub.copernicus.eu/dhus/#/home
-# riprovo
-
-####################### multitemporal 2020
+   
+##### Multitemporal NDVI Oct 2020 - May 2021 10m resolution (dec 2019)
 setwd("C:/internship/sen2r_out/NDVI")
-wd<-setwd("C:/internship/sen2r_out/NDVI")
+wd1 <-setwd("C:/internship/sen2r_out/NDVI")
 list <- list.files(pattern=".tif")
 raster <- lapply(list, raster)
 ndvi <- stack(raster)
 shp <- st_transform(myextent, CRS("+proj=utm +zone=28 +datum=WGS84 +units=m +no_defs")) # setting the same CRS
 ndvi_m <- mask(ndvi, shp)
+names(ndvi_m) <- c("NDVIOct7","NDVIOct12","NDVINov01","NDVINov21","NDVIDec27","NDVIJan20","NDVIJan30","NDVIFeb14","NDVIFeb19","NDVIMar26", "NDVIApr10", "NDVIMay20")# I change the names of the images for an easly reading
 plot(ndvi_m)
-ndvi_mo <- subset(ndvi_m, order(c("Mag20","Lug19","Ag08","Ag18","Ag28","Ott01","Ott07","Ott12","Nov21")))
 
-# NDVI 
+##### Multitemporal NDWI Oct 2020 - May 2021 10m resolution (dec 2019)
+
+setwd("C:/internship/sen2r_out/NDWI")
+wd2 <-setwd("C:/internship/sen2r_out/NDWI")
+list1 <- list.files(pattern=".tif")
+raster1 <- lapply(list1, raster)
+ndwi <- stack(raster1)
+shp <- st_transform(myextent, CRS("+proj=utm +zone=28 +datum=WGS84 +units=m +no_defs")) # setting the same CRS
+ndwi_m <- mask(ndwi, shp)
+names(ndwi_m) <- c("NDWIOct7","NDWIOct12","NDWINov01","NDWINov21", "NDVIDec27", "NDWIJan20","NDWIJan30","NDWIFeb14","NDWIFeb19","NDWIMar26", "NDWIApr10", "NDWIMay20")# I change the names of the images for an easly reading
+plot(ndwi_m)
+
+
 # # RStoolbox::unsuperClass
-wd_ndvi <- setwd("C:/internship/sen2r_out/NDVI")
-list.files(wd_ndvi)
+wd1
+ndvi_m
 tf_2111ndvi<- raster("S2A2A_20201121_123_Tenerife_NDVI_10.tif")
 shp <- st_transform(myextent, CRS("+proj=utm +zone=28 +datum=WGS84 +units=m +no_defs")) # setting the same CRS
 tf_2111ndvi <- mask( tf_2111ndvi, shp)
