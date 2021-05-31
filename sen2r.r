@@ -11,6 +11,7 @@ install.packages(c("leaflet", "leafpm", "mapedit", "shiny", "shinyFiles", "shiny
 
 library(sen2r)
 library(raster)
+library(sf)
 
 # Check shihub credentials
 write_scihub_login() # to write new credentials
