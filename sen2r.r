@@ -12,6 +12,8 @@ install.packages(c("leaflet", "leafpm", "mapedit", "shiny", "shinyFiles", "shiny
 library(sen2r)
 library(raster)
 library(sf)
+library(ggplot2)
+
 
 # Check shihub credentials
 write_scihub_login() # to write new credentials
@@ -69,6 +71,8 @@ shp <- st_transform(myextent, CRS("+proj=utm +zone=28 +datum=WGS84 +units=m +no_
 ndvi_m <- mask(ndvi, shp)
 names(ndvi_m) <- c("NDVIOct7","NDVIOct12","NDVINov01","NDVINov21","NDVIDec27","NDVIJan20","NDVIJan30","NDVIFeb14","NDVIFeb19","NDVIMar26", "NDVIApr10", "NDVIMay20")# I change the names of the images for an easly reading
 plot(ndvi_m)
+
+
 
 ##### Multitemporal NDWI Oct 2020 - May 2021 10m resolution (dec 2019)
 
