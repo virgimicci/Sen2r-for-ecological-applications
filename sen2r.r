@@ -14,9 +14,8 @@ library(raster)
 library(sf)
 library(ggplot2)
 
-
 # Check shihub credentials
-write_scihub_login() # to write new credentials
+write_scihub_login("name", "password") # save new username and password
 read_scihub_login() # returns a matrix of credentials, in which username is in the first column, password in the second
 check_scihub_login("name", "password") #  returns TRUE if credentials are valid, FALSE elsewhere
 check_scihub_connection() #  returns TRUE if internet connection is available and SciHub is accessible, FALSE otherwise.
@@ -35,7 +34,7 @@ check_scihub_connection() #  returns TRUE if internet connection is available an
 # with the output metadata
 
 #### TAKING DATA FROM senr2 ######
-myextent <- st_read("TEN.shp") #created by QGIS
+myextent <- st_read("TEN.shp") # created by QGIS
 # chek on copernicus hub my images: how they are, which are online and which not
 # if i have images that I need that are offline I order it (they will be online for me for a delimited time, then they will return offline)
 time_window <-as.Date(c("2020-10-01","2021-05-27"))
@@ -53,6 +52,7 @@ out_paths_1 <- sen2r(gui= FALSE, extent = myextent, extent_name = "Tenerife", ti
                      list_indices = c("NDVI", "NDWI"), mask_type = "cloud_and_shadow",
                      max_mask = 30, max_cloud_safe = 20, list_rgb = c("RGB432B", "RGBb84B"), 
                      path_l2a = "C:/internship/sen2r_safe", path_l1c = "C:/internship/sen2r_safe", path_out ="C:/internship/sen2r_out" )
+
 # I don't have a good Dic for the clouds, so I take the one of the previous year 
 time_window2 <-as.Date(c("2019-12-01","2019-12-31"))
 out_paths_1 <- sen2r(gui= FALSE, extent = myextent, extent_name = "Tenerife", timewindow = time_window2, 
@@ -87,3 +87,25 @@ names(ndwi_m) <- c("NDWIOct7","NDWIOct12","NDWINov01","NDWINov21", "NDVIDec27", 
 plot(ndwi_m)
 
 
+##### Another way to download data 
+
+# list of available S2 products (both online and LTA files)
+s2list <- s2_list(spatial_extent= myextent, time_interval= time_window, time_period= "full", max_cloud= 5, level= "L2A", availability= "ignore") 
+# I chek which files of my list are online and which are not (T/F)
+safe_is_online(s2list) # at the time the documentation was updated, this list was containing 4
+# archives already available online and 4 stored in the Long Term Archive)
+
+# If I want SAFE files that aren't anymore online I have to order them with the s2_order function 
+ordered_prods <- s2_order(s2list)
+
+# Check in a second time if the product was made available
+order_path <- attr(ordered_prods, "path")
+safe_is_online(order_path)
+# 2 of 4 Sentinel-2 images were not correctly ordered (HTML
+# status code: 200) because some invalid SAFE products were stored on the
+# ESA API Hub. Please retry ordering them on DHUS (set argument 'service
+# = "dhus"' in function s2_order())
+ordered_prods <- s2_order(s2list, service= "dhus")
+
+# download my list
+s2_download(s2list, outdir= "C:/internship/sen2r_safe")
