@@ -108,4 +108,46 @@ safe_is_online(order_path)
 ordered_prods <- s2_order(s2list, service= "dhus")
 
 # download my list
-s2_download(s2list, outdir= "C:/internship/sen2r_safe")
+s2_download(
+  s2list, outdir= "C:/internship/sen2r_safe")
+
+# in this way I can download just RAW files (SAFE products)
+# So, which functions can I use to modify these SAFE froducts?
+
+#### s2_translate() build a virtual raster from a Sentinel2 SAFE product
+
+s2_l2a_example <- file.path(
+  "C:/Internship/sen2r_safe",
+  "S2B_MSIL2A_20210326T115219_N0214_R123_T28RCS_20210326T141845.SAFE")
+
+# Create three products (ENVI) in the same directory at 60m resolution
+s2_translate(
+  s2_l2a_example, 
+  format = "ENVI", 
+  prod_type = c("BOA","TCI","SCL"),
+  res = "10m", 
+  subdirs = TRUE)
+
+####s2_rgb() Create RGB images from Sentinel-2 reflectances
+# Define file names
+ex_in <- system.file(
+"C:/Internship/sen2r_safe/BOA/S2B2A_20210326_123_28RCS_BOA_10.dat",
+package = "sen2r")
+
+# Run function (RIVEDERE CHE NON VA)
+ex_out <- s2_rgb(
+infiles = ex_in,
+rgb_bands = list(c(11,8,4),c(8,4,3)),
+scaleRange = list(c(0,7500), matrix(c(rep(0,3),8500,6000,4000),ncol=2)),
+outdir = tempdir())
+
+ex_out
+# Show output
+oldpar <- par(mfrow = c(1,3), mar = rep(0,4))
+image(stars::read_stars(ex_in), rgb = 4:2, maxColorValue = 3500)
+image(stars::read_stars(ex_out[1]), rgb = 1:3)
+image(stars::read_stars(ex_out[2]), rgb = 1:3)
+par(oldpar)
+# Apply a cloud mask to a Sentinel-2 product
+s2_mask()
+s2_perc_masked() #computes the percentage of cloud-masked surface
