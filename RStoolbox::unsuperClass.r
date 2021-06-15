@@ -24,11 +24,13 @@ Janr <- aggregate(Jan, fact= 10)
 Janr20 <- aggregate(Jan, fact= 20)
 Janr_cl <-  unsuperClass(Janr, nClasses = 6)
 Janr_cl20 <-  unsuperClass(Janr, nClasses = 6)
+par(mfrow=c(1,3))
 plot(Janr_cl20$map, col=cl, main= "Unsupervised classification Jan", axes= FALSE)
+plot(Janr_cl$map, col=cl, main= "Unsupervised classification Jan", axes= FALSE)
 
 #tenerife May NDVI
 Mayr20 <- aggregate(May, fact= 20)
-Mayr_cl20 <-  unsuperClass(Mayr, nClasses = 6)
+Mayr_cl20 <-  unsuperClass(Mayr20, nClasses = 6)
 plot(Mayr_cl20$map, col=cl, main= "Unsupervised classification May", axes= FALSE)
 
 
@@ -42,6 +44,7 @@ plot(Novr_cl20$map, col=cl, main= "Unsupervised classification Nov", axes= FALSE
 Jan1r <- aggregate(Jan1, fact= 10)
 Jan1r_cl <-  unsuperClass(Jan1r, nClasses = 6)
 plot(Jan1r_cl$map, col=cl, main= "Unsupervised classification Jan", axes= FALSE)
+
 # anaga
 extent <- c( 370000, 390560, 3140000, 3163080 )
 
