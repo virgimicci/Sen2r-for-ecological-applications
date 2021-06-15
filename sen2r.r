@@ -27,16 +27,14 @@ check_scihub_connection() #  returns TRUE if internet connection is available an
 # • GDAL for cloud mask smoothing and buffering;
 # • aria2 to download SAFE images with an alternative downloader
 
-# safe_is_online() if the required SAFE archives are available for download, or if they have to be
-# ordered from the Long Term Archive
-
 # safe_getMetadata() returns a data.table, a data.frame or a list (depending on argument format)
 # with the output metadata
 
-#### TAKING DATA FROM senr2 ######
+##### TAKING DATA FROM senr2 ######
+# First method
 myextent <- st_read("TEN.shp") # created by QGIS
 # chek on copernicus hub my images: how they are, which are online and which not
-# if i have images that I need that are offline I order it (they will be online for me for a delimited time, then they will return offline)
+# if there are images that I need, which are offline, I order them (they will be online for me for a delimited time, then they will return offline)
 time_window <-as.Date(c("2020-10-01","2021-05-27"))
 
 ### Now I have to create my code to download them with the sen2r()
@@ -87,11 +85,11 @@ names(ndwi_m) <- c("NDWIOct7","NDWIOct12","NDWINov01","NDWINov21", "NDVIDec27", 
 plot(ndwi_m)
 
 
-##### Another way to download data 
+#Second method
 
 # list of available S2 products (both online and LTA files)
 s2list <- s2_list(spatial_extent= myextent, time_interval= time_window, time_period= "full", max_cloud= 5, level= "L2A", availability= "ignore") 
-# I chek which files of my list are online and which are not (T/F)
+# I check which files of my list are online and which are not (T/F)
 safe_is_online(s2list) # at the time the documentation was updated, this list was containing 4
 # archives already available online and 4 stored in the Long Term Archive)
 
@@ -112,7 +110,7 @@ s2_download(
   s2list, outdir= "C:/internship/sen2r_safe")
 
 # in this way I can download just RAW files (SAFE products)
-# So, which functions can I use to modify these SAFE froducts?
+# So, which functions can I use to modify these SAFE products?
 
 #### s2_translate() build a virtual raster from a Sentinel2 SAFE product
 
@@ -120,7 +118,7 @@ s2_l2a_example <- file.path(
   "C:/Internship/sen2r_safe",
   "S2B_MSIL2A_20210326T115219_N0214_R123_T28RCS_20210326T141845.SAFE")
 
-# Create three products (ENVI) in the same directory at 60m resolution
+# Create three products (ENVI) in the same directory at 10m resolution
 s2_translate(
   s2_l2a_example, 
   format = "ENVI", 
@@ -148,6 +146,6 @@ image(stars::read_stars(ex_in), rgb = 4:2, maxColorValue = 3500)
 image(stars::read_stars(ex_out[1]), rgb = 1:3)
 image(stars::read_stars(ex_out[2]), rgb = 1:3)
 par(oldpar)
-# Apply a cloud mask to a Sentinel-2 product
-s2_mask()
+
+s2_mask() # Apply a cloud mask to a Sentinel-2 product
 s2_perc_masked() #computes the percentage of cloud-masked surface
