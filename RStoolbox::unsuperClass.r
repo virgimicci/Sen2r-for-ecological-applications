@@ -39,6 +39,14 @@ Novr <- aggregate(Nov, fact= 20)
 Novr_cl20 <-  unsuperClass(Novr, nClasses = 6)
 plot(Novr_cl20$map, col=cl, main= "Unsupervised classification Nov", axes= FALSE)
 
+# multiban classification 
+list <- list.files(pattern="T28RCS_20210120T115221_B")
+import <- lapply(list, raster)
+stack <- stack(import)
+
+ndvi <- raster("C:/Internship/sen2r_out/NDVI/5S2A2A_20210120_123_Tenerife_NDVI_10.tif")
+import1 <- raster(ndvi)
+list1 <- list(import, import1)
 
 #tneerife Jan NDWI
 Jan1r <- aggregate(Jan1, fact= 10)
