@@ -1,62 +1,47 @@
-setwd("C:/internship")
-wd<- setwd("C:/internship")
 
 library(raster)
 library(RStoolbox)
 library(viridis)
 
-Jan <-  ndvi_m$NDVIJan20
-Nov <- ndvi_m$NDVINov01
-May <- ndvi_m$NDVIMay20
-Jan1 <-  ndwi_m$NDWIJan20
-Nov1 <- ndwi_m$NDWINov01
-
 # # RStoolbox::unsuperClass
 
 set.seed(42)
 cl <- viridis(6)
-library(scales)
-show_col(viridis_pal()(20))
 
-
-#tenerife Jan NDVI
-Janr <- aggregate(Jan, fact= 10)
-Janr20 <- aggregate(Jan, fact= 20)
-Janr_cl <-  unsuperClass(Janr, nClasses = 6)
-Janr_cl20 <-  unsuperClass(Janr, nClasses = 6)
-par(mfrow=c(1,3))
-plot(Janr_cl20$map, col=cl, main= "Unsupervised classification Jan", axes= FALSE)
-plot(Janr_cl$map, col=cl, main= "Unsupervised classification Jan", axes= FALSE)
-
-#tenerife May NDVI
-Mayr20 <- aggregate(May, fact= 20)
-Mayr_cl20 <-  unsuperClass(Mayr20, nClasses = 6)
-plot(Mayr_cl20$map, col=cl, main= "Unsupervised classification May", axes= FALSE)
-
-
-#tenerife nov NDVI
-Novr <- aggregate(Nov, fact= 20)
-Novr_cl20 <-  unsuperClass(Novr, nClasses = 6)
-plot(Novr_cl20$map, col=cl, main= "Unsupervised classification Nov", axes= FALSE)
-
-# multiban classification 
-list <- list.files(pattern="T28RCS_20210120T115221_B")
+# Unsupervised classification 20 Jan all the bands + NDVI 60m
+wd <- "C:/Internship/sen2r_safe/S2A_MSIL2A_20210120T115221_N0214_R123_T28RCS_20210121T162058.SAFE/60mbands_ndvi"
+setwd(wd)
+list <-  list.files(wd)
 import <- lapply(list, raster)
+
+import[[1]] <- resample(import[[1]], import[[2]])
 stack <- stack(import)
 
-ndvi <- raster("C:/Internship/sen2r_out/NDVI/5S2A2A_20210120_123_Tenerife_NDVI_10.tif")
-import1 <- raster(ndvi)
-list1 <- list(import, import1)
+myextent <- st_read("C:/internship/TEN.shp")
+myextent <- st_transform(myextent,CRS(" +proj=utm +zone=28 +datum=WGS84 +units=m +no_defs"))
 
-#tneerife Jan NDWI
-Jan1r <- aggregate(Jan1, fact= 10)
-Jan1r_cl <-  unsuperClass(Jan1r, nClasses = 6)
-plot(Jan1r_cl$map, col=cl, main= "Unsupervised classification Jan", axes= FALSE)
+stack <- mask(stack, myextent) 
+stack <- crop(stack, myextent)
+names(stack) <- c("B01", "B02", "B03", "B04", "B05", "B06", "B07", "B09", "B11", "B12", "B8a")
+NDVI <- (stack$B8a -  stack$B04) / (stack$B8a + stack$B04)
+stack_ndvi <- addLayer(stack,NDVI)
 
+Jan20_multiband <-  unsuperClass(stack_ndvi, nClasses = 6)
+plot(Jan20_multiband$map, col=cl, main= "Unsupervised classification Jan multiband", axes= FALSE)
+
+# Unsupervised classification Jan NDVI
+class_ndvi <- unsuperClass(NDVI, nClasses = 6)
+plot(class_ndvi$map, col=cl, main= "Unsupervised classification NDVI", axes= FALSE)
+
+# Compare them 
+par(mfrow=c(1,2))
+plot(Jan20_multiband$map, col=cl, main= "Unsupervised classification Jan multiband", axes= FALSE)
+plot(class_ndvi$map, col=cl, main= "Unsupervised classification NDVI", axes= FALSE)
+    
 # anaga
 extent <- c( 370000, 390560, 3140000, 3163080 )
 
-
+importndvi 
 ## teide
 extent2 <- c(330000, 355000, 3117000, 3135000)
 
