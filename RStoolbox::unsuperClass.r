@@ -13,8 +13,6 @@ wd <- "C:/Internship/sen2r_safe/S2A_MSIL2A_20210120T115221_N0214_R123_T28RCS_202
 setwd(wd)
 list <-  list.files(wd)
 import <- lapply(list, raster)
-
-import[[1]] <- resample(import[[1]], import[[2]])
 stack <- stack(import)
 
 myextent <- st_read("C:/internship/TEN.shp")
@@ -26,8 +24,9 @@ names(stack) <- c("B01", "B02", "B03", "B04", "B05", "B06", "B07", "B09", "B11",
 NDVI <- (stack$B8a -  stack$B04) / (stack$B8a + stack$B04)
 stack_ndvi <- addLayer(stack,NDVI)
 
-Jan20_multiband <-  unsuperClass(stack_ndvi, nClasses = 6)
-plot(Jan20_multiband$map, col=cl, main= "Unsupervised classification Jan multiband", axes= FALSE)
+# RStoolbox::unsuperClass
+class_60m <-  unsuperClass(stack_ndvi, nClasses = 6)
+plot(class_60m$map, col=cl, main= "Unsupervised classification 60m res", axes= FALSE)
 
 # Unsupervised classification Jan NDVI
 class_ndvi <- unsuperClass(NDVI, nClasses = 6)
@@ -35,9 +34,26 @@ plot(class_ndvi$map, col=cl, main= "Unsupervised classification NDVI", axes= FAL
 
 # Compare them 
 par(mfrow=c(1,2))
-plot(Jan20_multiband$map, col=cl, main= "Unsupervised classification Jan multiband", axes= FALSE)
+plot(class_60m$map, col=cl, main= "Unsupervised classification Jan multiband", axes= FALSE)
 plot(class_ndvi$map, col=cl, main= "Unsupervised classification NDVI", axes= FALSE)
-    
+
+# Unsupervised classification 20 Jan all the bands + NDVI 10m
+wd2 <- setwd("C:/Internship/sen2r_safe/S2A_MSIL2A_20210120T115221_N0214_R123_T28RCS_20210121T162058.SAFE/GRANULE/L2A_T28RCS_A029149_20210120T115219/IMG_DATA/R10m")
+setwd(wd2)
+list1 <-  list.files(wd2, pattern ="T28RCS_20210120T115221_B")
+import1 <- lapply(list1, raster)
+stack1<- stack(import1)
+ndvi <- raster("C:/Internship/sen2r_out/NDVI/5S2A2A_20210120_123_Tenerife_NDVI_10.tif")
+names(ndvi) <- "ndvi"
+list_ndvi_bands <- list(stack1, ndvi)
+
+
+names(import1) <- c("B02", "B03", "B04", "B08")
+
+# RStoolbox::unsuperClass
+class_10m <- unsuperClass(stack1, nClasses = 6)
+plot(class_10m$map, col=cl, main= "Unsupervised classification 10m res", axes= FALSE)
+
 # anaga
 extent <- c( 370000, 390560, 3140000, 3163080 )
 
