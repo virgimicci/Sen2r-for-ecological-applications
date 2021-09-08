@@ -1,20 +1,23 @@
-wd <- "C:/Internship/sen2r_safe/S2A_MSIL2A_20210120T115221_N0214_R123_T28RCS_20210121T162058.SAFE/60mbands_ndvi"
+wd <- "C:/Internship/sen2r_safe/S2A_MSIL2A_20210120T115221_N0214_R123_T28RCS_20210121T162058.SAFE/GRANULE/L2A_T28RCS_A029149_20210120T115219/IMG_DATA/R10m"
 setwd(wd)
 
 library(raster)
 library(sp)
 library(sf)
-
-list <-  list.files(wd)
+ndvi <- raster("C:/Internship/sen2r_out/NDVI/5S2A2A_20210120_123_Tenerife_NDVI_10.tif")
+list <-  list.files(wd, pattern= "T28RCS_20210120T115221_B")
 import <- lapply(list, raster)
 stack <- stack(import)
+# change dimensions and extent of the ndvi in order to stack with the bands
+ndvi <- resample(ndvi, stack)
+stack_ndvi <- addLayer(stack, ndvi)
 
 myextent <- st_read("C:/internship/TEN.shp") #loading my shp
 myextent <- st_transform(myextent,CRS(" +proj=utm +zone=28 +datum=WGS84 +units=m +no_defs")) #transforming the crs
 
-stack <- mask(stack, myextent) 
-stack <- crop(stack, myextent)
-names(stack) <- c("B01", "B02", "B03", "B04", "B05", "B06", "B07", "B09", "B11", "B12", "B8a")
+stack_ndvi <- mask(stack_ndvi, myextent) 
+stack_ndvi <- crop(stack_ndvi, myextent)
+names(stack_ndvi) <- c("B01", "B02", "B03", "B04", "NVDI")
 # B1	60 m	443 nm	Ultra Blue (Coastal and Aerosol)
 # B2	10 m	490 nm	Blue
 # B3	10 m	560 nm	Green
@@ -30,7 +33,7 @@ names(stack) <- c("B01", "B02", "B03", "B04", "B05", "B06", "B07", "B09", "B11",
 # The class names and colors for plotting
 classn <- c("Cardonal-tabaibal", "Bosque Termófilo", "Laurisilva", "Fayal-brezal", "Pianar", "Alta montaña")
 classdf <- data.frame(classvalue1 = c(1,2,3,4,5,6), classnames1 = classn) #create a df with a vector of values and a vector of names
-classcolor <- c("#FEFEB1", "#40DFA0", "#006700", "#007373", "#905040", "#FFC2F5 ") #vector of color that I will use for the classification
+classcolor <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00") #vector of color that I will use for the classification
 
 # load a shp of random poligons within Tenerife created with QGIS
 samp <- shapefile("C:/Internship/tenerife_classification.shp")
@@ -39,17 +42,18 @@ ptsamp <- spsample(samp, 1000, type='regular')
 # add the land cover class to the points
 ptsamp$Class <- over(ptsamp, samp)$Class
 # extract values with points
-df <- raster::extract(stack, ptsamp)
+ptsamp <- spTransform(ptsamp, "+proj=utm +zone=28 +datum=WGS84 +units=m +no_defs")
+df <- raster::extract(stack_ndvi, ptsamp)
 
 library(rasterVis)
 
 #plot the stack with the points
-plt <- levelplot(stack, col.regions = classcolor, main = 'Distribution of Training Sites')
+plt <- levelplot(stack_ndvi, col.regions = classcolor, main = 'Distribution of Training Sites')
 print(plt + layer(sp.points(ptsamp, pch = 3, cex = 0.5, col = 1)))
 
 ### extract values for sites
 # Extract the layer values for the locations
-sampvals <- extract(stack, ptsamp, df = TRUE)
+sampvals <- extract(stack_ndvi, ptsamp, df = TRUE)
 
 # drop the ID column
 sampvals <- sampvals[, -1]
@@ -60,7 +64,7 @@ sampdata <- data.frame(classvalue, sampvals)
 ## train the classifier
 library(rpart)
 # Train the model
-cart <- rpart(as.factor(classvalue)~., data=sampdata, method = 'class', minsplit = 5)
+cart <- rpart(as.factor(classvalue)~., data=sampdata, method = 'class', minsplit = 6)
 # print(model.class)
 # Plot the trained classification tree
 plot(cart, uniform=TRUE, main="Classification Tree")
@@ -68,7 +72,7 @@ text(cart, cex = 0.8)
 
 ### Classify
 # Now predict the subset data based on the model; prediction for entire area takes longer time
-pr2020 <- predict(stack, cart, type='class')
+pr2020 <- predict(stack_ndvi, cart, type='class')
 pr2020
 
 pr2020 <- ratify(pr2020)
