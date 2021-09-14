@@ -93,8 +93,17 @@ s2list <- s2_list(spatial_extent= myextent, time_interval= time_window, time_per
 safe_is_online(s2list) # at the time the documentation was updated, this list was containing 4
 # archives already available online and 4 stored in the Long Term Archive)
 
-# If I want SAFE files that aren't anymore online I have to order them with the s2_order function 
+# If I want SAFE files that aren't anymore online I have 
+# to order them with the s2_order function 
 ordered_prods <- s2_order(s2list)
+# once ordered, 
+# it takes some time before they go online. you can check in a second moment if they are online.
+safe_is_online(ordered_prods)
+
+# Once they are online you can continue with the download
+# download my list
+s2_download(
+  s2list, outdir= "C:/internship/sen2r_safe")
 
 # Check in a second time if the product was made available
 order_path <- attr(ordered_prods, "path")
@@ -107,7 +116,7 @@ ordered_prods <- s2_order(s2list, service= "dhus")
 
 # download my list
 s2_download(
-  s2list, outdir= "C:/internship/sen2r_safe")
+  s2list, outdir= "C:Users/micci/Documents/internship/sen2r_safe")
 
 # in this way I can download just RAW files (SAFE products)
 # So, which functions can I use to modify these SAFE products?
